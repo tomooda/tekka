@@ -1,8 +1,8 @@
 class initialization
 install
 	"TekkaEngine install"
-	self installSkkDictionary.
 	self setupNeedsLeadingChar.
+	self installSkkDictionary.
 	self installHiraganaToKatakana.
 	self installRomanToKana.
 	self installVowelIndexDictionary.

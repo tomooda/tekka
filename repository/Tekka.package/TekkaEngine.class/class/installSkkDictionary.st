@@ -33,7 +33,8 @@ installSkkDictionary
 																					- 1].
 															variants nextPut: variant].
 													dict at: key put: variants contents]]]]]]
-		ifFalse: [dict
+		ifFalse: [
+			dict
 				at: '.'
 				put: (Array with: (self character: 20983810) asString).
 			dict
