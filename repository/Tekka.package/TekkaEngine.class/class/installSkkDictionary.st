@@ -15,7 +15,7 @@ installSkkDictionary
 				during: [:progress | [stream atEnd]
 						whileFalse: [progress value: stream position.
 							(self readline: stream)
-								in: [:line | line first isLetter
+								in: [:line | (#($; $>) includes: line first) not
 										ifTrue: [| lineStream key variants |
 											lineStream := line readStream.
 											key := lineStream upTo: Character space.
