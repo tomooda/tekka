@@ -1,6 +1,6 @@
 servicing
 firstCandidate: aTextEditor 
-	| start end roman kana entries |
+	| start end roman kana entries addEntry |
 	aTextEditor hasSelection
 		ifTrue: [^ self].
 	start := aTextEditor selectionInterval first.
@@ -20,31 +20,28 @@ firstCandidate: aTextEditor
 							includesKey: (aTextEditor paragraph text asString copyFrom: end - numChars to: end))
 						ifTrue: [start := end - numChars]]].
 	aTextEditor selectFrom: start to: end.
-	roman := aTextEditor selection asString.
-	original := roman.
+	original := aTextEditor selection asString.
+	roman := original asLowercase.
 	kana := self romanToKana: roman.
-	entries := Array new writeStream.
-	entries nextPut: kana.
-	roman size >= 2
-		ifTrue: [entries
-				nextPutAll: ((SkkDictionary
+	entries := OrderedCollection new: 20.
+	addEntry := [:entry | (entries includes: entry) ifFalse: [entries add: entry]].
+	addEntry value: kana.
+	(roman size >= 2 and: [(roman last between: $a and: $z) and: [roman last isVowel not]])
+		ifTrue: [(SkkDictionary
 						at: ((self
 								romanToKana: (roman copyFrom: 1 to: roman size - 1))
 								copyWith: roman last)
 						ifAbsent: [#()])
-						collect: [:stem | stem copyWith: roman last])].
-	entries
-		nextPutAll: (SkkDictionary
+						do: [:stem | addEntry value: (stem copyWith: roman last)]].
+	(SkkDictionary
 				at: original asLowercase
-				ifAbsent: [#()]).
-	entries
-		nextPutAll: (SkkDictionary
+				ifAbsent: [#()]) do: [ :entry | addEntry value: entry].
+	(SkkDictionary
 				at: kana
-				ifAbsent: [#()]).
-	entries
-		nextPut: (self hiraganaToKatakana: kana).
-	entries nextPut: original.
-	candidates := entries contents.
+				ifAbsent: [#()]) do: [ :entry | addEntry value: entry].
+	addEntry value: (self hiraganaToKatakana: kana).
+	addEntry value: original.
+	candidates := entries asArray.
 	aTextEditor
 		replace: aTextEditor selectionInterval
 		with: kana
