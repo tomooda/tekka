@@ -24,22 +24,31 @@ firstCandidate: aTextEditor
 	roman := original asLowercase.
 	kana := self romanToKana: roman.
 	entries := OrderedCollection new: 20.
-	addEntry := [:entry | (entries includes: entry) ifFalse: [entries add: entry]].
+	addEntry := [:entry | (entries includes: entry)
+				ifFalse: [entries add: entry]].
 	addEntry value: kana.
-	(roman size >= 2 and: [(roman last between: $a and: $z) and: [roman last isVowel not]])
+	(roman size >= 2
+			and: [(roman last between: $a and: $z)
+					and: [roman last isVowel not
+							or: [roman size >= 3
+									and: [(roman at: roman size - 1) isVowel]]]])
 		ifTrue: [(SkkDictionary
-						at: ((self
-								romanToKana: (roman copyFrom: 1 to: roman size - 1))
-								copyWith: roman last)
-						ifAbsent: [#()])
-						do: [:stem | addEntry value: (stem copyWith: roman last)]].
+				at: ((self
+						romanToKana: (roman copyFrom: 1 to: roman size - 1))
+						copyWith: roman last)
+				ifAbsent: [#()])
+				do: [:stem | addEntry
+						value: (stem copyWith: roman last)]].
 	(SkkDictionary
-				at: original asLowercase
-				ifAbsent: [#()]) do: [ :entry | addEntry value: entry].
+		at: original asLowercase
+		ifAbsent: [#()])
+		do: [:entry | addEntry value: entry].
 	(SkkDictionary
-				at: kana
-				ifAbsent: [#()]) do: [ :entry | addEntry value: entry].
-	addEntry value: (self hiraganaToKatakana: kana).
+		at: kana
+		ifAbsent: [#()])
+		do: [:entry | addEntry value: entry].
+	addEntry
+		value: (self hiraganaToKatakana: kana).
 	addEntry value: original.
 	candidates := entries asArray.
 	aTextEditor
