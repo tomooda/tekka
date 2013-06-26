@@ -1,0 +1,21 @@
+{
+	"commentStamp" : "",
+	"super" : "Object",
+	"category" : "Tekka-Core",
+	"classinstvars" : [ ],
+	"pools" : [ ],
+	"classvars" : [
+		"Current",
+		"HiraganaToKatakana",
+		"NeedsLeadingChar",
+		"RomanToKana",
+		"SkkDictionary",
+		"VowelIndexDictionary"
+	],
+	"instvars" : [
+		"original",
+		"candidates"
+	],
+	"name" : "TekkaEngine",
+	"type" : "normal"
+}
