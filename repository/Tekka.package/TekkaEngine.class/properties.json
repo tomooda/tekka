@@ -14,7 +14,8 @@
 	],
 	"instvars" : [
 		"original",
-		"candidates"
+		"candidates",
+		"keys"
 	],
 	"name" : "TekkaEngine",
 	"type" : "normal"
