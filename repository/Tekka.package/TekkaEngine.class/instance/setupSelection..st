@@ -1,18 +1,19 @@
 servicing
 setupSelection: aTextEditor 
-	| start end |
+	| isRoman start end |
 	aTextEditor hasSelection
 		ifTrue: [^ self].
+	isRoman := [:char | ((char between: $a and: $z)
+					or: [char between: $A and: $Z])
+				or: [#($' $- $~ ) includes: char]].
 	start := aTextEditor selectionInterval first.
 	end := aTextEditor selectionInterval last.
 	(start >= 2
-			and: [(aTextEditor paragraph text at: start - 1) isLetter])
+			and: [isRoman
+					value: (aTextEditor paragraph text at: start - 1)])
 		ifTrue: [[start >= 2
-				and: [| char |
-					char := aTextEditor paragraph text at: start - 1.
-					((char between: $a and: $z)
-							or: [char between: $A and: $Z])
-						or: [#($' $- $~ ) includes: char]]]
+				and: [isRoman
+						value: (aTextEditor paragraph text at: start - 1)]]
 				whileTrue: [start := start - 1]]
 		ifFalse: [0
 				to: (9 min: end - 1)

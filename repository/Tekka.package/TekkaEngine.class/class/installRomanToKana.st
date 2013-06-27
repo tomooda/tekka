@@ -39,6 +39,7 @@ installRomanToKana
 	composer value: 'sy' value: #('しゃ' 'しぃ' 'しゅ' 'しぇ' 'しょ').
 	composer value: 't' value: 'たちつてと'.
 	composer value: 'th' value: #('てゃ' 'てぃ' 'てゅ' 'てぇ' 'てょ').
+	composer value: 'ts' value: #('つぁ' 'つぃ' 'つ' 'つぇ' 'つぉ').
 	composer value: 'ty' value: #('ちゃ' 'ちぃ' 'ちゅ' 'ちぇ' 'ちょ').
 	composer value: 'v' value: #('ゔぁ' 'ゔぃ' 'ゔ' 'ゔぇ' 'ゔぉ').
 	composer value: 'vy' value: #('ゔゃ' 'ゔぃ' 'ゔゅ' 'ゔぇ' 'ゔょ').
