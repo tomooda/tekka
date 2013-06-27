@@ -1,0 +1,11 @@
+{
+	"commentStamp" : "",
+	"super" : "EUCJPTextConverter",
+	"category" : "Tekka-Core",
+	"classinstvars" : [ ],
+	"pools" : [ ],
+	"classvars" : [ ],
+	"instvars" : [ ],
+	"name" : "TekkaEUCJPTextConverter",
+	"type" : "normal"
+}

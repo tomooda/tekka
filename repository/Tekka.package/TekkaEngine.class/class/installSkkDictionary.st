@@ -10,7 +10,7 @@ installSkkDictionary
 		ifTrue: [FileStream
 				readOnlyFileNamed: self skkDicFilename
 				do: [:stream | 
-					stream converter: EUCJPTextConverter new.
+					stream converter: TekkaEUCJPTextConverter new.
 					UIManager default
 						displayProgress: 'Reading SKK dictionary'
 						at: World center
