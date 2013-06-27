@@ -1,3 +1,3 @@
 class initialization
 setupNeedsLeadingChar
-	NeedsLeadingChar := (Clipboard clipboardText: 'あ'; clipboardText) first leadingChar > 0
+	NeedsLeadingChar := ((String fromByteArray: #[164 162]) convertFromEncoding: 'eucjp') first leadingChar > 0
