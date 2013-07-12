@@ -1,4 +1,4 @@
-*Tekka-squeak-class initialization
+*Tekka-Platform.squeak-class initialization
 initialize
 	"SmalltalkEditor initialize"
 	self initializeCmdKeyShortcuts.
