@@ -1,5 +1,6 @@
 private
 lookupWithZinc: aString 
+	"Tekkazan new lookupWithZinc: 'にほんごをにゅうりょくする'"
 	| answer |
 	answer := WideString new writeStream.
 	(((Smalltalk at: #ZnEasy)
