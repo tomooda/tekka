@@ -6,6 +6,7 @@ install
 	self installHiraganaToKatakana.
 	self installRomanToKana.
 	self installVowelIndexDictionary.
-	TextEditor cmdActions at: $j asciiValue + 1 put: #tekka:.
+	Current := self new.
+	TextEditor installTekkaShortcut.
 	TextEditor
-		allSubclassesDo: [:editorClass | editorClass cmdActions at: $j asciiValue + 1 put: #tekka:]
+		allSubclassesDo: [:editorClass | editorClass installTekkaShortcut]

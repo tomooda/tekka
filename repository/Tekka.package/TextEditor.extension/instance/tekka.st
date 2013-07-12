@@ -1,3 +1,5 @@
 *Tekka-editor
 tekka
-	TekkaEngine current convert: self
+	Smalltalk
+		at: #TekkaEngine
+		ifPresent: [:tekka | tekka current convert: self]
