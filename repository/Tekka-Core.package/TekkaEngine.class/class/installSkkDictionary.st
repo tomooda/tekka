@@ -5,7 +5,7 @@ installSkkDictionary
 	dict := Dictionary new.
 	((FileStream isAFileNamed: self skkDicFilename) not
 			and: [UIManager default confirm: 'SKK-JISYO.Lをダウンロードし保存しますか？ SKK-JISYO.LはGPLでライセンスされています。詳しくは http://www.gnu.org/licenses/gpl.html を参照ください。' , String cr , 'Do you want to download SKK-JISYO.L? SKK-JISYO.L is distributed under GPL. Please see http://www.gnu.org/licenses/gpl.html for details.'])
-		ifTrue: [self downloadSkkDic ].
+		ifTrue: [self downloadSkkDic].
 	(FileStream isAFileNamed: self skkDicFilename)
 		ifTrue: [FileStream
 				readOnlyFileNamed: self skkDicFilename
@@ -16,7 +16,13 @@ installSkkDictionary
 						at: World center
 						from: 0
 						to: stream size
-						during: [:progress | [stream atEnd]
+						during: [:progressModel | 
+							| progress progressThreshold |
+							progressThreshold := 0.0.
+							progress := [:value | value > progressThreshold
+										ifTrue: [progressModel value: value.
+											progressThreshold := value + 0.01]].
+							[stream atEnd]
 								whileFalse: [progress value: stream position.
 									(self readline: stream)
 										in: [:line | (#($; $> ) includes: line first) not
@@ -33,8 +39,7 @@ installSkkDictionary
 																					- 1].
 															variants nextPut: variant].
 													dict at: key put: variants contents]]]]]]
-		ifFalse: [
-			dict
+		ifFalse: [dict
 				at: '.'
 				put: (Array with: (self character: 20983810) asString).
 			dict
