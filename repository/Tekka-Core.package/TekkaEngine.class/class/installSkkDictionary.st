@@ -21,7 +21,7 @@ installSkkDictionary
 							progressThreshold := 0.0.
 							progress := [:value | value > progressThreshold
 										ifTrue: [progressModel value: value.
-											progressThreshold := value + 0.01]].
+											progressThreshold := value + 4096]].
 							[stream atEnd]
 								whileFalse: [progress value: stream position.
 									(self readline: stream)
