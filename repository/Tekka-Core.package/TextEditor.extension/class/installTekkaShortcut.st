@@ -2,4 +2,6 @@
 installTekkaShortcut
 	Smalltalk
 		at: #TekkaEngine
-		ifPresent: [:tekkaClass | self cmdActions at: $j asciiValue + 1 put: #tekka:]
+		ifPresent: [:tekkaClass | 
+			self cmdActions ifNil: [self initializeCmdKeyShortcuts].
+			self cmdActions at: $j asciiValue + 1 put: #tekka:]
