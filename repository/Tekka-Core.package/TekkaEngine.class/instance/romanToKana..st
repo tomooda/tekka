@@ -41,7 +41,7 @@ romanToKana: aString
 														ifTrue: [kana
 																nextPut: (self character: 20983955).
 															consonant := String new]
-														ifFalse: [consonant = char asString ifTrue: [kana nextPut: $っ. consonant := String new]].
+														ifFalse: [consonant = char asString ifTrue: [kana nextPut: (self character: 20983907). consonant := String new]].
 													consonant := consonant copyWith: char]]]]]].
 	consonant = 'n'
 		ifTrue: [kana
