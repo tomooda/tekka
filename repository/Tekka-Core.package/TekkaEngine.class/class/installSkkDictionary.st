@@ -13,7 +13,6 @@ installSkkDictionary
 					stream converter: TekkaEUCJPTextConverter new.
 					UIManager default
 						displayProgress: 'Reading SKK dictionary'
-						at: World center
 						from: 0
 						to: stream size
 						during: [:progressModel | 

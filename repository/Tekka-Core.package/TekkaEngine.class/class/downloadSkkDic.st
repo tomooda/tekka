@@ -1,25 +1,31 @@
 class initialization
 downloadSkkDic
-	| httpStream |
-	httpStream := nil.
-	(httpStream isNil and: [ Smalltalk includesKey: #HTTPSocket ])
+	(Smalltalk includesKey: #HTTPSocket)
 		ifTrue: [ 
+			| httpStream |
 			httpStream := GZipReadStream
 				on:
 					(((Smalltalk at: #HTTPSocket) httpGet: self skkDicURL)
 						binary;
-						yourself) ].
-	(httpStream isNil and: [ Smalltalk includesKey: #ZnHTTPSocketFacade ])
+						yourself).
+			FileStream
+				newFileNamed: self skkDicFilename
+				do: [ :localStream | 
+					localStream binary.
+					[ httpStream atEnd ] whileFalse: [ localStream nextPut: httpStream next ] ].
+			^ self ].
+	(Smalltalk includesKey: #ZnClient)
 		ifTrue: [ 
-			httpStream := (Smalltalk at: #GZipReadStream)
+			| gzipStream |
+			gzipStream := (Smalltalk at: #GZipReadStream)
 				on:
-					((ZnHTTPSocketFacade httpGet: self skkDicURL)
-						binary;
-						yourself) ].
-	httpStream isNil
-		ifTrue: [ UIManager default inform: 'HTTPSocket or ZnHTTPSocketFacade required to download the dictionary.' ].
-	FileStream
-		newFileNamed: self skkDicFilename
-		do: [ :localStream | 
-			localStream binary.
-			[ httpStream atEnd ] whileFalse: [ localStream nextPut: httpStream next ] ]
+					(ZnClient new
+						beOneShot;
+						get: self skkDicURL asZnUrl).
+			FileStream
+				newFileNamed: self skkDicFilename
+				do: [ :localStream | 
+					localStream binary.
+					[ gzipStream atEnd ] whileFalse: [ localStream nextPut: gzipStream next ] ].
+			^ self ].
+	^ UIManager default inform: 'HTTPSocket or ZnHTTPSocketFacade required to download the dictionary.'
