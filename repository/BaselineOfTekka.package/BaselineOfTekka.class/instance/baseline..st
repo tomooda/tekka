@@ -5,6 +5,6 @@ baseline: spec
 		for: #common
 		do: [ spec
 				package: 'Tekka-Core';
-				package: 'Tekka-Platform.pharo';
+				package: 'Tekka-Platform';
 				package: 'Tekka-Extensions-GoogleIME'.
-			spec group: 'default' with: #('Tekka-Core' 'Tekka-Platform.pharo') ]
+			spec group: 'default' with: #('Tekka-Core' 'Tekka-Platform') ]
