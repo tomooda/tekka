@@ -1,4 +1,4 @@
-*Tekka-Platform
+*Tekka-Core
 buildTekkaShortcut: aBuilder
 	<keymap>
 	(aBuilder shortcut: #tekka) 

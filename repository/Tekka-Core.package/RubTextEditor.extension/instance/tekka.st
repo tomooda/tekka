@@ -1,4 +1,4 @@
-*Tekka-Platform
+*Tekka-Core
 tekka
 	Smalltalk
 		at: #TekkaEngine

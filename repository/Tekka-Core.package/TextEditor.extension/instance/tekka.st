@@ -1,4 +1,4 @@
-*Tekka-Core-editor
+*Tekka-Core
 tekka
 	Smalltalk
 		at: #TekkaEngine

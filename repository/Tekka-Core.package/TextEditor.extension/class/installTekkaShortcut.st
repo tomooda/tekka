@@ -1,4 +1,4 @@
-*Tekka-Core-class initialization
+*Tekka-Core
 installTekkaShortcut
 	Smalltalk
 		at: #TekkaEngine

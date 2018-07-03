@@ -1,4 +1,4 @@
-*Tekka-Core-editor
+*Tekka-Core
 tekka: aKeyboardEvent
 	self tekka.
 	^ true
