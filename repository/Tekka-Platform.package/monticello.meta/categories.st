@@ -1,1 +1,1 @@
-SystemOrganization addCategory: #'Tekka-Platform.pharo'!
+SystemOrganization addCategory: #'Tekka-Platform'!

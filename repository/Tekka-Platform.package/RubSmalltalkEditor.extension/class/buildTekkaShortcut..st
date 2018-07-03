@@ -1,4 +1,4 @@
-*Tekka-Platform.pharo
+*Tekka-Platform
 buildTekkaShortcut: aBuilder
 	<keymap>
 	(aBuilder shortcut: #tekka) 

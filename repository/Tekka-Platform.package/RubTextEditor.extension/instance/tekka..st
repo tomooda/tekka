@@ -1,4 +1,4 @@
-*Tekka-Platform.pharo
+*Tekka-Platform
 tekka: aKeyboardEvent
 	self tekka.
 	^ true
