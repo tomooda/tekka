@@ -18,14 +18,6 @@ Class {
 	#category : 'Tekka-Core'
 }
 
-{ #category : #utilities }
-TekkaEngine class >> character: anInteger [ 
-	^ Character
-		value: (NeedsLeadingChar
-				ifTrue: [anInteger]
-				ifFalse: [anInteger bitAnd: 16r3FFFFF])
-]
-
 { #category : #'sole instance' }
 TekkaEngine class >> current [
 	^ Current
@@ -34,35 +26,17 @@ TekkaEngine class >> current [
 
 { #category : #'class initialization' }
 TekkaEngine class >> downloadSkkDic [
-	(Smalltalk includesKey: #HTTPSocket)
-		ifTrue: [ 
-			| httpStream |
-			httpStream := GZipReadStream
-				on:
-					(((Smalltalk at: #HTTPSocket) httpGet: self skkDicURL)
-						binary;
-						yourself).
-			FileStream
-				newFileNamed: self skkDicFilename
-				do: [ :localStream | 
-					localStream binary.
-					[ httpStream atEnd ] whileFalse: [ localStream nextPut: httpStream next ] ].
-			^ self ].
-	(Smalltalk includesKey: #ZnClient)
-		ifTrue: [ 
-			| gzipStream |
-			gzipStream := (Smalltalk at: #GZipReadStream)
-				on:
-					(ZnClient new
-						beOneShot;
-						get: self skkDicURL asZnUrl).
-			FileStream
-				newFileNamed: self skkDicFilename
-				do: [ :localStream | 
-					localStream binary.
-					[ gzipStream atEnd ] whileFalse: [ localStream nextPut: gzipStream next ] ].
-			^ self ].
-	^ UIManager default inform: 'HTTPSocket or ZnHTTPSocketFacade required to download the dictionary.'
+	<script: 'downloadSkkDic'>
+	| gzipStream |
+	gzipStream := GZipReadStream
+		on:
+			(ZnClient new
+				beOneShot;
+				get: 'http://openlab.jp/skk/dic/SKK-JISYO.L.gz' asUrl).
+	self skkDicFilename
+		binaryWriteStreamDo: [ :writeStream | 
+			[ gzipStream atEnd ]
+				whileFalse: [ writeStream nextPut: gzipStream next ] ]
 ]
 
 { #category : #'class initialization' }
@@ -72,9 +46,13 @@ TekkaEngine class >> ifInstalled: aBlock [
 ]
 
 { #category : #'class initialization' }
+TekkaEngine class >> initialize [
+	self install
+]
+
+{ #category : #'class initialization' }
 TekkaEngine class >> install [
 	"TekkaEngine install"
-	self setupNeedsLeadingChar.
 	self installSkkDictionary.
 	self installHiraganaToKatakana.
 	self installRomanToKana.
@@ -88,13 +66,10 @@ TekkaEngine class >> install [
 { #category : #'class initialization' }
 TekkaEngine class >> installHiraganaToKatakana [
 	"TekkaEngine installHiraganaToKatakana"
+
 	| dict composer |
 	dict := Dictionary new.
-	composer := [:hiras :katas | hiras
-				with: katas
-				do: [:hira :kata | dict
-						at: (self character: hira asciiValue)
-						put: (self character: kata asciiValue)]].
+	composer := [ :hiras :katas | hiras with: katas do: [ :hira :kata | dict at: hira put: kata ] ].
 	composer value: 'あいうえお' value: 'アイウエオ'.
 	composer value: 'ぁぃぅぇぉ' value: 'ァィゥェォ'.
 	composer value: 'ゔ' value: 'ヴ'.
@@ -119,10 +94,10 @@ TekkaEngine class >> installHiraganaToKatakana [
 { #category : #'class initialization' }
 TekkaEngine class >> installRomanToKana [
 	"TekkaEngine installRomanToKana"
-	
+
 	| dict composer |
 	dict := Dictionary new.
-	composer := [ :consonant :kanas | dict at: consonant put: (kanas asArray collect: [ :kana | kana asString collect: [ :c | self character: c asciiValue]])].
+	composer := [ :consonant :kanas | dict at: consonant put: (kanas asArray collect: [ :ch | ch asString ]) ].
 	composer value: '' value: 'あいうえお'.
 	composer value: 'b' value: 'ばびぶべぼ'.
 	composer value: 'by' value: #('びゃ' 'びぃ' 'びゅ' 'びぇ' 'びょ').
@@ -164,7 +139,7 @@ TekkaEngine class >> installRomanToKana [
 	composer value: 'w' value: #('わ' 'うぃ' 'う' 'うぇ' 'を').
 	composer value: 'wh' value: #('うぁ' 'うぃ' 'う' 'うぇ' 'うぉ').
 	composer value: 'x' value: 'ぁぃぅぇぉ'.
-	composer value: 'xt' value: #('xta' 'xti'  'っ' 'xte' 'xto').
+	composer value: 'xt' value: #('xta' 'xti' 'っ' 'xte' 'xto').
 	composer value: 'xw' value: 'ゎぃぅぇぉ'.
 	composer value: 'xy' value: 'ゃぃゅぇょ'.
 	composer value: 'y' value: #('や' 'い' 'ゆ' 'いぇ' 'よ').
@@ -175,50 +150,41 @@ TekkaEngine class >> installRomanToKana [
 
 { #category : #'class initialization' }
 TekkaEngine class >> installSkkDictionary [
-	"TekkaEngine installSkkDictionary"
+	<script: 'TekkaEngine installSkkDictionary'>
 	| dict |
 	dict := Dictionary new.
-	((FileStream isAFileNamed: self skkDicFilename) not
-			and: [UIManager default confirm: 'SKK-JISYO.Lをダウンロードし保存しますか？ SKK-JISYO.LはGPLでライセンスされています。詳しくは http://www.gnu.org/licenses/gpl.html を参照ください。' , String cr , 'Do you want to download SKK-JISYO.L? SKK-JISYO.L is distributed under GPL. Please see http://www.gnu.org/licenses/gpl.html for details.'])
-		ifTrue: [self downloadSkkDic].
-	(FileStream isAFileNamed: self skkDicFilename)
-		ifTrue: [FileStream
-				readOnlyFileNamed: self skkDicFilename
-				do: [:stream | 
-					stream converter: TekkaEUCJPTextConverter new.
-					UIManager default
-						displayProgress: 'Reading SKK dictionary'
-						from: 0
-						to: stream size
-						during: [:progressModel | 
-							| progress progressThreshold |
-							progressThreshold := 0.0.
-							progress := [:value | value > progressThreshold
-										ifTrue: [progressModel value: value.
-											progressThreshold := value + 4096]].
-							[stream atEnd]
-								whileFalse: [progress value: stream position.
-									(self readline: stream)
-										in: [:line | (#($; $> ) includes: line first) not
-												ifTrue: [| lineStream key variants |
-													lineStream := line readStream.
-													key := lineStream upTo: Character space.
-													variants := Array new writeStream.
-													lineStream next.
-													[lineStream atEnd]
-														whileFalse: [| variant |
-															variant := lineStream upTo: $/.
-															(variant includes: $;)
-																ifTrue: [variant := variant copyFrom: 1 to: (variant indexOf: $;)
-																					- 1].
-															variants nextPut: variant].
-													dict at: key put: variants contents]]]]]]
-		ifFalse: [dict
-				at: '.'
-				put: (Array with: (self character: 20983810) asString).
-			dict
-				at: ','
-				put: (Array with: (self character: 20983809) asString)].
+	(self skkDicFilename exists not
+		and: [ UIManager default
+				confirm:
+					'SKK-JISYO.Lをダウンロードし保存しますか？ SKK-JISYO.LはGPLでライセンスされています。詳しくは http://www.gnu.org/licenses/gpl.html を参照ください。'
+						, String cr
+						,
+							'Do you want to download SKK-JISYO.L? SKK-JISYO.L is distributed under GPL. Please see http://www.gnu.org/licenses/gpl.html for details.' ])
+		ifTrue: [ self downloadSkkDic ].
+	self skkDicFilename exists
+		ifTrue: [ | stream |
+			self skkDicFilename
+				binaryReadStreamDo: [ :binary | 
+					stream := (EUCJPTextConverter new
+						convertFromSystemString: binary upToEnd asString) readStream ].
+			[ stream atEnd ]
+				whileFalse: [ | line |
+					line := stream upTo: Character lf.
+					(#($; $>) includes: line first) not
+						ifTrue: [ | lineStream key variants |
+							lineStream := line readStream.
+							key := lineStream upTo: Character space.
+							variants := Array new writeStream.
+							lineStream next.
+							[ lineStream atEnd ]
+								whileFalse: [ | variant |
+									variant := lineStream upTo: $/.
+									(variant includes: $;)
+										ifTrue: [ variant := variant copyFrom: 1 to: (variant indexOf: $;) - 1 ].
+									variants nextPut: variant ].
+							dict at: key put: variants contents ] ] ]
+		ifFalse: [ dict at: '.' put: (Array with: '。').
+			dict at: ',' put: (Array with: '、') ].
 	^ SkkDictionary := dict
 ]
 
@@ -233,33 +199,21 @@ TekkaEngine class >> installVowelIndexDictionary [
 				 yourself
 ]
 
-{ #category : #utilities }
-TekkaEngine class >> readline: aStream [ 
-	aStream atEnd
-		ifTrue: [^ nil].
-	^ WideString
-		new: 1000
-		streamContents: [:stream | | ch | [(ch := aStream next) == nil
-				or: [(CharacterSet crlf includes: ch)
-						and: [ch = Character cr
-								ifTrue: [aStream peekFor: Character lf].
-							true]]]
-				whileFalse: [stream nextPut: ch]]
-]
-
-{ #category : #'class initialization' }
-TekkaEngine class >> setupNeedsLeadingChar [
-	NeedsLeadingChar := ((String fromByteArray: #[164 162]) convertFromEncoding: 'eucjp') first leadingChar > 0
+{ #category : #resources }
+TekkaEngine class >> skkDicDirectory [
+	^ (FileLocator localDirectory / 'Tekka')
+		ensureCreateDirectory;
+		yourself
 ]
 
 { #category : #resources }
 TekkaEngine class >> skkDicFilename [
-	^ 'SKK-JISYO.L' copy
+	^ self skkDicDirectory / 'SKK-JISYO.L'
 ]
 
 { #category : #resources }
 TekkaEngine class >> skkDicURL [
-	^ 'http://openlab.jp/skk/dic/SKK-JISYO.L.gz' copy
+	^ 'http://openlab.jp/skk/dic/SKK-JISYO.L.gz' asUrl
 ]
 
 { #category : #extensions }
@@ -271,11 +225,6 @@ TekkaEngine >> addExtension: aDictionary [
 				ifNil: [Array new])
 				copyWith: aDictionary.
 	^ aDictionary
-]
-
-{ #category : #servicing }
-TekkaEngine >> character: anInteger [ 
-	^ self class character: anInteger
 ]
 
 { #category : #servicing }
@@ -377,18 +326,23 @@ TekkaEngine >> lastSpit [
 { #category : #servicing }
 TekkaEngine >> learnLastSpit [
 	| bringFirst |
-	bringFirst :=	[:key :entry | (SkkDictionary
-								at: key
-								ifAbsent: [])
-								ifNotNilDo: [:entries | (entries includes: entry)
-										ifTrue: [SkkDictionary at: key put: (Array with: entry)
-													, (entries copyWithout: entry)]]].
+	bringFirst := [ :key :entry | 
+	(SkkDictionary at: key ifAbsent: [  ])
+		ifNotNil: [ :entries | 
+			(entries includes: entry)
+				ifTrue: [ SkkDictionary
+						at: key
+						put: (Array with: entry) , (entries copyWithout: entry) ] ] ].
 	keys
-		ifNotNil: [self lastSpit
-				ifNotNil: [:lastSpit | keys
-						do: [:key | bringFirst value: key value: lastSpit.
+		ifNotNil: [ self lastSpit
+				ifNotNil: [ :lastSpit | 
+					keys
+						do: [ :key | 
+							bringFirst value: key value: lastSpit.
 							lastSpit size >= 2
-										ifTrue: [bringFirst value: key value: (lastSpit copyFrom: 1 to: lastSpit size - 1)]]]].
+								ifTrue: [ bringFirst
+										value: key
+										value: (lastSpit copyFrom: 1 to: lastSpit size - 1) ] ] ] ]
 ]
 
 { #category : #servicing }
@@ -418,54 +372,52 @@ TekkaEngine >> removeExtension: aDictionary [
 ]
 
 { #category : #servicing }
-TekkaEngine >> romanToKana: aString [ 
-	"TekkaEngine new romanToKana: 'janjaan'"
-	"TekkaEngine new romanToKana: 'jyan''jya-n'"
-	"TekkaEngine new romanToKana: 'jixyannjixya~n'"
+TekkaEngine >> romanToKana: aString [
+	"(TekkaEngine new romanToKana: 'janjaan') >>> 'じゃんじゃあん'"
+
+	"(TekkaEngine new romanToKana: 'jyan''jya-n') >>> 'じゃんじゃーん'"
+
+	"(TekkaEngine new romanToKana: 'jixyannjixya~n') >>> 'じゃんじゃ〜ん'"
+
 	| kana consonant |
 	kana := String new writeStream.
 	consonant := String new.
 	aString asLowercase
-		do: [:char | char = $~
-				ifTrue: [kana nextPutAll: consonant.
-					kana
-						nextPut: (self character: 21036894).
-					consonant := String new]
-				ifFalse: [char = $-
-						ifTrue: [kana nextPutAll: consonant.
-							kana
-								nextPut: (self character: 20984060).
-							consonant := String new]
-						ifFalse: [char isVowel
-								ifTrue: [(RomanToKana
-										at: consonant
-										ifAbsent: [])
-										ifNil: [kana nextPutAll: consonant;
-												 nextPut: char]
-										ifNotNil: [:kanas | kana
-												nextPutAll: (kanas
-														at: (VowelIndexDictionary at: char))].
-									consonant := String new]
-								ifFalse: [((char = $n
-												or: [char = $'])
-											and: [consonant = 'n'])
-										ifTrue: [kana
-												nextPut: (self character: 20983955).
-											consonant := String new]
-										ifFalse: [((char between: $a and: $z) or: [char between: $A and: $Z]) not
-												ifTrue: [kana nextPutAll: consonant;
-														 nextPut: char.
-													consonant := String new]
-												ifFalse: [(consonant = 'n' and: [char ~= $y])
-														ifTrue: [kana
-																nextPut: (self character: 20983955).
-															consonant := String new]
-														ifFalse: [consonant = char asString ifTrue: [kana nextPut: (self character: 20983907). consonant := String new]].
-													consonant := consonant copyWith: char]]]]]].
+		do: [ :char | 
+			char = $~
+				ifTrue: [ kana nextPutAll: consonant.
+					kana nextPut: $～.
+					consonant := String new ]
+				ifFalse: [ char = $-
+						ifTrue: [ kana nextPutAll: consonant.
+							kana nextPut: $ー.
+							consonant := String new ]
+						ifFalse: [ char isVowel
+								ifTrue: [ (RomanToKana at: consonant ifAbsent: [  ])
+										ifNil: [ kana
+												nextPutAll: consonant;
+												nextPut: char ]
+										ifNotNil:
+											[ :kanas | kana nextPutAll: (kanas at: (VowelIndexDictionary at: char)) ].
+									consonant := String new ]
+								ifFalse: [ ((char = $n or: [ char = $' ]) and: [ consonant = 'n' ])
+										ifTrue: [ kana nextPut: $ん.
+											consonant := String new ]
+										ifFalse: [ ((char between: $a and: $z) or: [ char between: $A and: $Z ]) not
+												ifTrue: [ kana
+														nextPutAll: consonant;
+														nextPut: char.
+													consonant := String new ]
+												ifFalse: [ (consonant = 'n' and: [ char ~= $y ])
+														ifTrue: [ kana nextPut: $ん.
+															consonant := String new ]
+														ifFalse: [ consonant = char asString
+																ifTrue: [ kana nextPut: $っ.
+																	consonant := String new ] ].
+													consonant := consonant copyWith: char ] ] ] ] ] ].
 	consonant = 'n'
-		ifTrue: [kana
-				nextPut: (self character: 20983955).
-			consonant := String new].
+		ifTrue: [ kana nextPut: $ん.
+			consonant := String new ].
 	^ kana contents , consonant
 ]
 

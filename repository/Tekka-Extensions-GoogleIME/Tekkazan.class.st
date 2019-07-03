@@ -49,6 +49,41 @@ Tekkazan class >> inactivate [
 		ifPresent: [:tekkaEngine | tekkaEngine current removeExtension: self current]
 ]
 
+{ #category : #testing }
+Tekkazan class >> isActive [
+	"Tekkazan isActive"
+
+	^ (Smalltalk globals includesKey: #TekkaEngine)
+		and:
+			[ (Smalltalk at: #TekkaEngine) current includesExtension: self current ]
+]
+
+{ #category : #settings }
+Tekkazan class >> tekkazanSettingsOn: aBuilder [
+	<systemsettings>
+	(aBuilder group: #Tekka)
+		label: 'Tekka';
+		description: 'Tekka related settings';
+		noOrdering;
+		with: [ (aBuilder setting: #useTekkazan)
+				label: 'Use Tekkazan (Google IME)';
+				noOrdering;
+				description:
+					'If checked then Tekka will use Google IME API to convert a Japanese phrase.' ]
+]
+
+{ #category : #settings }
+Tekkazan class >> useTekkazan [
+	^ self isActive
+]
+
+{ #category : #settings }
+Tekkazan class >> useTekkazan: aBoolean [
+	aBoolean = true
+		ifTrue: [ self activate ]
+		ifFalse: [ self inactivate ]
+]
+
 { #category : #accessing }
 Tekkazan >> at: aString ifAbsent: aBlock [
 	^ [ self candidatesFor: aString ]
@@ -57,42 +92,23 @@ Tekkazan >> at: aString ifAbsent: aBlock [
 ]
 
 { #category : #private }
-Tekkazan >> candidatesFor: aString [ 
-	^ ((Smalltalk includesKey: #ZnEasy)
-			and: [Smalltalk includesKey: #ZnPercentEncoder])
-		ifTrue: [self lookupWithZinc: aString]
-		ifFalse: [self lookupWithHttpSocket: aString]
-]
+Tekkazan >> candidatesFor: aString [
+	"Tekkazan new candidatesFor: '日本語を入力する'"
 
-{ #category : #private }
-Tekkazan >> lookupWithHttpSocket: aString [ 
-	"Tekkazan new lookupWithHttpSocket: 'にほんごをにゅうりょくする'"
-	| answer |
-	answer := WideString new writeStream.
-	(((HTTPSocket httpGet: 'http://www.google.com/transliterate?langpair=ja-Hira|ja&text=' , aString) contents convertFromEncoding: 'utf-8')
-		findTokens: ']]')
-		do: [:part | ((part copyFrom: 2 to: part size) findTokens: $, escapedBy: $\)
-				ifNotEmpty: [:terms | terms size >= 2
-						ifTrue: [(terms second findTokens: $" escapedBy: $\)
-								in: [:entry | entry size = 3
-										ifTrue: [answer nextPutAll: entry second]]]]].
-	^ Array with: answer contents
-]
-
-{ #category : #private }
-Tekkazan >> lookupWithZinc: aString [ 
-	"Tekkazan new lookupWithZinc: 'にほんごをにゅうりょくする'"
 	| answer |
 	answer := WideString new writeStream.
 	(((Smalltalk at: #ZnEasy)
-		get: ('http://www.google.com/transliterate?langpair=ja-Hira|ja&text='
-				, ((Smalltalk at: #ZnPercentEncoder) new encode: aString)) asUrl) contents findTokens: ']]')
-		do: [:part | ((part copyFrom: 2 to: part size)
-				findTokens: $,
-				escapedBy: $\)
-				ifNotEmpty: [:terms | terms size >= 2
-						ifTrue: [(terms second findTokens: $" escapedBy: $\)
-								in: [:entry | entry size = 3
-										ifTrue: [answer nextPutAll: entry second]]]]].
+		get:
+			('http://www.google.com/transliterate?langpair=ja-Hira|ja&text='
+				, ((Smalltalk at: #ZnPercentEncoder) new encode: aString)) asUrl)
+		contents findTokens: ']]')
+		do: [ :part | 
+			((part copyFrom: 2 to: part size) findTokens: $, escapedBy: $\)
+				ifNotEmpty: [ :terms | 
+					terms size >= 2
+						ifTrue: [ (terms second findTokens: $" escapedBy: $\)
+								in: [ :entry | 
+									entry size = 3
+										ifTrue: [ answer nextPutAll: entry second ] ] ] ] ].
 	^ Array with: answer contents
 ]
