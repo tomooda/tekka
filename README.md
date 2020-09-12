@@ -9,12 +9,14 @@ Tekka is deeply inspired by SKK and Sekka: their simplicity and less-modal human
 Tekka is partly supported by Japanese MEXT/JSPS KAKENHI Grant Number 23650077.
 
 # INSTALL
+It is recommended to use Japanese font by Pharo -> Settings -> Appearence -> Standard Fonts.
+
 * Plan A: Use Iceberg to load this. Choose "default" to install Tekka, or "Tekkazan" to install extension for Google IME API.
 * Plan B: 
 ```
 Metacello new
 	baseline: 'Tekka';
-	repository: 'github://tomooda/tekka/repository';
+	repository: 'github://tomooda/tekka:main/repository';
 	load.
 ```
 
