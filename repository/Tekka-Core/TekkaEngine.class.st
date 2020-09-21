@@ -300,7 +300,7 @@ TekkaEngine >> hiraganaToKatakana: aString [
 
 { #category : #extensions }
 TekkaEngine >> includesExtension: aDictionary [
-	^ extensions includes: aDictionary
+	^ extensions notNil and: [extensions includes: aDictionary]
 ]
 
 { #category : #testing }
