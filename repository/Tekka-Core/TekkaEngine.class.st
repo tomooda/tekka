@@ -52,15 +52,19 @@ TekkaEngine class >> initialize [
 
 { #category : #'class initialization' }
 TekkaEngine class >> install [
+
 	"TekkaEngine install"
+
 	self installSkkDictionary.
 	self installHiraganaToKatakana.
 	self installRomanToKana.
 	self installVowelIndexDictionary.
 	Current := self new.
 	TextEditor installTekkaShortcut.
-	TextEditor
-		allSubclassesDo: [:editorClass | editorClass installTekkaShortcut]
+	TextEditor allSubclassesDo: [ :editorClass | 
+		editorClass installTekkaShortcut ].
+	Smalltalk at: #KMRepository ifPresent: [ :repository | 
+		(repository respondsTo: #reset) ifTrue: [ repository reset ] ]
 ]
 
 { #category : #'class initialization' }
